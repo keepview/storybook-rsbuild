@@ -2,15 +2,8 @@ import path from 'node:path'
 import { appTools, defineConfig } from '@modern-js/app-tools'
 import { bffPlugin } from '@modern-js/plugin-bff'
 
-const runtimeConfig = {
-  runtime: {
-    router: true,
-  },
-}
-
 // https://modernjs.dev/en/configure/app/usage
 export default defineConfig({
-  ...runtimeConfig,
   source: {
     alias: {
       '@my-src': path.resolve(__dirname, 'src'),
@@ -43,9 +36,13 @@ export default defineConfig({
   bff: {
     prefix: '/bff-api',
   },
-  server: {
-    port: 8088,
-  },
+
+  server:
+    process.env.npm_lifecycle_event === 'e2e'
+      ? undefined
+      : {
+          port: 8088,
+        },
   dev: process.env.BFF_PROXY
     ? {
         server: {
