@@ -10,9 +10,17 @@
     "allowSyntheticDefaultImports": true,
     "paths": {
       "@/*": ["./src/*"],
-      "@shared/*": ["./shared/*"]
+      "@shared/*": ["./shared/*"],
+      "@api/*": ["./api/*"]
     }
   },
-  "include": ["src", "shared", "config", "modern.config.ts", ".storybook/**/*"],
+  "include": [
+    "src",
+    "shared",
+    "config",
+    "modern.config.ts",
+    "api",
+    ".storybook/**/*"
+  ],
   "exclude": ["**/node_modules"]
 }
