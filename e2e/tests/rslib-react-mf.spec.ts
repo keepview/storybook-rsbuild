@@ -1,5 +1,6 @@
 import path from 'node:path'
 import { expect, test } from '@playwright/test'
+import getPort from 'get-port'
 import { sandboxes } from '../sandboxes'
 import { waitForPreviewReady } from '../utils/assertions'
 import { type DevServerHandle, launchDevServer } from '../utils/devServer'
@@ -12,20 +13,36 @@ if (!sandbox) {
 }
 
 const DEV_SERVER_READY_INDICATOR = 'built in'
+const RESERVED_PORTS = new Set(sandboxes.map(({ port }) => port))
 
 test.describe(sandbox.name, () => {
   let server: Awaited<ReturnType<typeof launchSandbox>> | null = null
   let devServer: DevServerHandle | null = null
 
   test.beforeAll(async () => {
+    const remotePort = (
+      await getPort({
+        exclude: [...RESERVED_PORTS],
+      })
+    ).toString()
+
     devServer = await launchDevServer({
       cwd: path.resolve(sandbox.relativeDir),
       command: { executable: 'pnpm', args: ['run', 'dev'] },
       readyIndicator: DEV_SERVER_READY_INDICATOR,
       logPrefix: `[${sandbox.name}:dev]`,
+      env: {
+        MF_REMOTE_PORT: remotePort,
+      },
     })
     try {
-      server = await launchSandbox(sandbox)
+      server = await launchSandbox({
+        ...sandbox,
+        env: {
+          ...sandbox.env,
+          MF_REMOTE_PORT: remotePort,
+        },
+      })
     } catch (error) {
       await devServer.stop()
       devServer = null
